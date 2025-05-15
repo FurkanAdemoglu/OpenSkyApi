@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/flightMapFragment">
+    <fragment
+        android:id="@+id/flightMapFragment"
+        android:name="com.example.openskyapicase.presentation.ui.FlightMapFragment"
+        android:label="Flights" />
+</navigation>

@@ -6,5 +6,6 @@ data class Flight(
     val originCountry: String,
     val longitude: Double?,
     val latitude: Double?,
-    val altitude: Double?
+    val altitude: Double?,
+    val track:Float?
 )
