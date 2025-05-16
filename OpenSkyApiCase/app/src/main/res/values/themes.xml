@@ -7,10 +7,4 @@
     <style name="Theme.OpenSkyApiCase" parent="Base.Theme.OpenSkyApiCase" >
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
-
-    <style name="Theme.OpenSkyApiCase.Splash" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="windowSplashScreenBackground">@color/white</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_plane</item>
-        <item name="postSplashScreenTheme">@style/Theme.OpenSkyApiCase</item>
-    </style>
 </resources>

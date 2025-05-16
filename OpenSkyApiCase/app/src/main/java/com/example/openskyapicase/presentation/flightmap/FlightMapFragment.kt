@@ -90,7 +90,7 @@ class FlightMapFragment : BaseFragment<FragmentFlightMapBinding>(R.layout.fragme
         }
     }
 
-
+    //Spinner listener set for filter
     private fun initSpinnerListener() {
         binding.countrySpinner.onItemSelectedListener =
             object : AdapterView.OnItemSelectedListener {
@@ -142,7 +142,7 @@ class FlightMapFragment : BaseFragment<FragmentFlightMapBinding>(R.layout.fragme
             val first = flights.first()
             val lat = first.latitude ?: 0.0
             val lng = first.longitude ?: 0.0
-            googleMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lat, lng), 6f))
+            googleMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lat, lng), 7f))
             viewModel.isCameraMoved = true
         }
     }
