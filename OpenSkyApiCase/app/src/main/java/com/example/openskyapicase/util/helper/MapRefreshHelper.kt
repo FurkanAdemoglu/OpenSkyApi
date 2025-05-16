@@ -28,11 +28,12 @@ class MapRefreshHelper(
     }
 
     private fun setupMapListeners() {
+        //Eğer kamera hareket ederse false a çekiyor
         googleMap.setOnCameraMoveListener {
             isCameraIdle = false
             refreshJob?.cancel()
         }
-
+        //Eğer kamera sabit bırakılırsa değer true olduğu için 10 saniyede bir istek atıyor
         googleMap.setOnCameraIdleListener {
             if (!isCameraIdle) {
                 isCameraIdle = true

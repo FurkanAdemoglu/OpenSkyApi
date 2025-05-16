@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
+import androidx.appcompat.app.AlertDialog
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
@@ -30,5 +31,26 @@ abstract class BaseFragment<DB : ViewDataBinding>(
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+    protected fun showAppDialog(
+        title: String,
+        message: String,
+        positiveText: String = "Tamam",
+        negativeText: String? = null,
+        cancelable: Boolean = true,
+        onPositive: (() -> Unit)? = null,
+        onNegative: (() -> Unit)? = null,
+    ) {
+        AlertDialog.Builder(requireContext())
+            .setTitle(title)
+            .setMessage(message)
+            .setCancelable(cancelable)
+            .setPositiveButton(positiveText) { _, _ -> onPositive?.invoke() }
+            .apply {
+                if (!negativeText.isNullOrEmpty()) {
+                    setNegativeButton(negativeText) { _, _ -> onNegative?.invoke() }
+                }
+            }
+            .show()
     }
 }

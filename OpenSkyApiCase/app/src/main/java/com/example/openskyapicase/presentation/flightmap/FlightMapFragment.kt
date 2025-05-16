@@ -1,19 +1,17 @@
-package com.example.openskyapicase.presentation.ui
+package com.example.openskyapicase.presentation.flightmap
 
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.openskyapicase.R
 import com.example.openskyapicase.base.BaseFragment
 import com.example.openskyapicase.databinding.FragmentFlightMapBinding
 import com.example.openskyapicase.domain.model.Flight
-import com.example.openskyapicase.presentation.viewModel.FlightMapUiState
-import com.example.openskyapicase.presentation.viewModel.FlightMapViewModel
-import com.example.openskyapicase.util.extension.isInternetAvailable
 import com.example.openskyapicase.util.extension.vectorToBitmap
 import com.example.openskyapicase.util.helper.MapRefreshHelper
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -23,6 +21,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class FlightMapFragment : BaseFragment<FragmentFlightMapBinding>(R.layout.fragment_flight_map),
@@ -31,15 +30,12 @@ class FlightMapFragment : BaseFragment<FragmentFlightMapBinding>(R.layout.fragme
     private val viewModel: FlightMapViewModel by viewModels()
     private var googleMap: GoogleMap? = null
     private lateinit var mapRefreshHelper: MapRefreshHelper
-    private var isCameraMoved = false
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (!requireContext().isInternetAvailable()){
-            showErrorDialog("İnternet bağlantısı bulunamadı. Lütfen bağlantınızı kontrol edin.")
-            return
-        }
+        //Harita için fragment SupportMapFragment oluşturuldu
         childFragmentManager
             .findFragmentById(R.id.map_fragment_container)
             ?.let { it as? SupportMapFragment }
@@ -49,27 +45,32 @@ class FlightMapFragment : BaseFragment<FragmentFlightMapBinding>(R.layout.fragme
         initSpinnerListener()
     }
 
+    //viewModelde state i observe eden yapı
     private fun initObservers() {
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            viewModel.uiState.collect { state ->
-                when (state) {
-                    is FlightMapUiState.Loading -> Unit
+        lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.uiState.collect { state ->
+                    when (state) {
+                        is FlightMapUiState.Loading -> Unit
 
-                    is FlightMapUiState.Success -> {
-                        binding.countrySpinner.visibility = View.VISIBLE
-                        updateCountrySpinner(state.countries, state.selectedCountry)
-                        updateMapMarkers(state.flights)
-                    }
+                        is FlightMapUiState.Success -> {
+                            binding.countrySpinner.visibility = View.VISIBLE
+                            updateCountrySpinner(state.countries, state.selectedCountry)
+                            updateMapMarkers(state.flights)
+                        }
 
-                    is FlightMapUiState.Error -> {
-                        binding.countrySpinner.visibility = View.GONE
-                        showErrorDialog(state.message)
+                        is FlightMapUiState.Error -> {
+                            binding.countrySpinner.visibility = View.GONE
+                            showAppDialog(title = getString(R.string.error), message = state.message)
+                        }
                     }
                 }
             }
         }
+
     }
 
+    //Spinner a country listesini ekleyen yapı
     private fun updateCountrySpinner(countries: List<String>, selected: String?) {
         val countryList = listOf(ALL_COUNTRIES_OPTION) + countries
         val adapter = ArrayAdapter(
@@ -97,7 +98,7 @@ class FlightMapFragment : BaseFragment<FragmentFlightMapBinding>(R.layout.fragme
                     parent: AdapterView<*>, view: View?, position: Int, id: Long
                 ) {
                     val selected = parent.getItemAtPosition(position) as String
-                    viewModel.selectCountry(if (selected == "Tümü") null else selected)
+                    viewModel.selectCountry(if (selected == ALL_COUNTRIES_OPTION) null else selected)
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>) {
@@ -116,6 +117,7 @@ class FlightMapFragment : BaseFragment<FragmentFlightMapBinding>(R.layout.fragme
         )
     }
 
+    //Markerları ekranda koordinatlarına göre gösteren yapı
     private fun updateMapMarkers(flights: List<Flight>) {
         googleMap?.clear()
         val airplaneIcon = requireContext().vectorToBitmap(R.drawable.ic_airplane)
@@ -135,24 +137,17 @@ class FlightMapFragment : BaseFragment<FragmentFlightMapBinding>(R.layout.fragme
                 )
             }
         }
-
-        if (!isCameraMoved && flights.isNotEmpty()) {
+        //Kameranın zoom olan kısmı sadece ilk ekran göründüğünde zoom oluyor sonrası için olmuyor
+        if (!viewModel.isCameraMoved && flights.isNotEmpty()) {
             val first = flights.first()
             val lat = first.latitude ?: 0.0
             val lng = first.longitude ?: 0.0
             googleMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lat, lng), 6f))
-            isCameraMoved = true
+            viewModel.isCameraMoved = true
         }
     }
 
-    private fun showErrorDialog(message: String) {
-        AlertDialog.Builder(requireContext())
-            .setTitle("Hata")
-            .setMessage(message)
-            .setPositiveButton("Tamam", null)
-            .show()
-    }
-
+    //OnPause ve onDestroyda 10 saniyede bir yenileme özelliği kapanıyor uygulama arka plana geçtiği için
     override fun onPause() {
         super.onPause()
         mapRefreshHelper.cleanup()

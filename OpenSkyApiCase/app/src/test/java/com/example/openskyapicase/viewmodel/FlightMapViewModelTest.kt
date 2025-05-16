@@ -5,7 +5,7 @@ import com.example.openskyapicase.MainDispatcherRule
 import com.example.openskyapicase.common.State
 import com.example.openskyapicase.domain.repository.FlightRepository
 import com.example.openskyapicase.domain.usecase.GetFlightsUseCase
-import com.example.openskyapicase.presentation.viewModel.FlightMapViewModel
+import com.example.openskyapicase.presentation.flightmap.FlightMapViewModel
 import com.example.openskyapicase.usecase.testData
 import com.example.openskyapicase.util.CityLocation
 import io.mockk.coEvery

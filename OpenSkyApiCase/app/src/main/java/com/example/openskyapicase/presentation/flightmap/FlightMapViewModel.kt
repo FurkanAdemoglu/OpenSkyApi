@@ -1,4 +1,4 @@
-package com.example.openskyapicase.presentation.viewModel
+package com.example.openskyapicase.presentation.flightmap
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -35,6 +35,7 @@ class FlightMapViewModel @Inject constructor(
     private val _selectedCountry = MutableStateFlow<String?>(null)
 
     private var allFlights: List<Flight> = emptyList()
+    var isCameraMoved = false
 
     init {
         fetchFlights()
@@ -52,6 +53,7 @@ class FlightMapViewModel @Inject constructor(
                         is State.Success -> {
                             allFlights = state.data ?: emptyList()
                             val countries = getDistinctCountries(allFlights)
+                            //Eğer seçilen ülke sonraki istekte giderse seçilen country null oluyor ve case tümü ne geçiyor
                             if (_selectedCountry.value != null && _selectedCountry.value !in countries) {
                                 _selectedCountry.value = null
                             }
@@ -75,13 +77,15 @@ class FlightMapViewModel @Inject constructor(
         )
     }
 
+    //Uçuşların filtrelendiği alan
     private fun filterFlights(flights: List<Flight>, country: String?): List<Flight> {
         return if (country.isNullOrEmpty()) flights else flights.filter { it.originCountry == country }
     }
-
+    //Tekrarlı olmuycak şekilde ülkeler eklendi
     private fun getDistinctCountries(flights: List<Flight>): List<String> =
         flights.mapNotNull { it.originCountry }.distinct().sorted()
 
+    //Spinnerdan ülke seçme
     fun selectCountry(country: String?) {
         _selectedCountry.value = country
         val countries = getDistinctCountries(allFlights)

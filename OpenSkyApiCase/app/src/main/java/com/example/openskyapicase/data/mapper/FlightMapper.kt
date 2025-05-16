@@ -2,6 +2,7 @@ package com.example.openskyapicase.data.mapper
 
 import com.example.openskyapicase.domain.model.Flight
 
+//Apiden dönen response u kullanılabilen bir data class a çeviriyor ve liste döndürüyor
 fun List<List<Any>>.toFlightList(): List<Flight> {
     return this.mapNotNull { state ->
         try {
