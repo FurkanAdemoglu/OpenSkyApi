@@ -51,17 +51,11 @@ class FlightMapViewModel @Inject constructor(
 
                         is State.Success -> {
                             allFlights = state.data ?: emptyList()
-                            val countries =
-                                allFlights.mapNotNull { it.originCountry }.distinct().sorted()
+                            val countries = getDistinctCountries(allFlights)
                             if (_selectedCountry.value != null && _selectedCountry.value !in countries) {
                                 _selectedCountry.value = null
                             }
-                            val filteredFlights = filterFlights(allFlights, _selectedCountry.value)
-                            _uiState.value = FlightMapUiState.Success(
-                                flights = filteredFlights,
-                                countries = countries,
-                                selectedCountry = _selectedCountry.value
-                            )
+                            updateUiState(countries)
                         }
 
                         is State.Error -> {
@@ -72,19 +66,26 @@ class FlightMapViewModel @Inject constructor(
         }
     }
 
+    private fun updateUiState(countries: List<String>) {
+        val filteredFlights = filterFlights(allFlights, _selectedCountry.value)
+        _uiState.value = FlightMapUiState.Success(
+            flights = filteredFlights,
+            countries = countries,
+            selectedCountry = _selectedCountry.value
+        )
+    }
+
     private fun filterFlights(flights: List<Flight>, country: String?): List<Flight> {
         return if (country.isNullOrEmpty()) flights else flights.filter { it.originCountry == country }
     }
 
+    private fun getDistinctCountries(flights: List<Flight>): List<String> =
+        flights.mapNotNull { it.originCountry }.distinct().sorted()
+
     fun selectCountry(country: String?) {
         _selectedCountry.value = country
-        val filteredFlights = filterFlights(allFlights, country)
-        val countries = allFlights.mapNotNull { it.originCountry }.distinct().sorted()
-        _uiState.value = FlightMapUiState.Success(
-            flights = filteredFlights,
-            countries = countries,
-            selectedCountry = country
-        )
+        val countries = getDistinctCountries(allFlights)
+        updateUiState(countries)
     }
 }
 

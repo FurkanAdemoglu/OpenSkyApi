@@ -13,6 +13,7 @@ import com.example.openskyapicase.databinding.FragmentFlightMapBinding
 import com.example.openskyapicase.domain.model.Flight
 import com.example.openskyapicase.presentation.viewModel.FlightMapUiState
 import com.example.openskyapicase.presentation.viewModel.FlightMapViewModel
+import com.example.openskyapicase.util.extension.isInternetAvailable
 import com.example.openskyapicase.util.extension.vectorToBitmap
 import com.example.openskyapicase.util.helper.MapRefreshHelper
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -22,7 +23,6 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class FlightMapFragment : BaseFragment<FragmentFlightMapBinding>(R.layout.fragment_flight_map),
@@ -36,9 +36,14 @@ class FlightMapFragment : BaseFragment<FragmentFlightMapBinding>(R.layout.fragme
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val mapFragment = childFragmentManager
-            .findFragmentById(R.id.map_fragment_container) as SupportMapFragment
-        mapFragment.getMapAsync(this)
+        if (!requireContext().isInternetAvailable()){
+            showErrorDialog("İnternet bağlantısı bulunamadı. Lütfen bağlantınızı kontrol edin.")
+            return
+        }
+        childFragmentManager
+            .findFragmentById(R.id.map_fragment_container)
+            ?.let { it as? SupportMapFragment }
+            ?.getMapAsync(this)
 
         initObservers()
         initSpinnerListener()
@@ -52,21 +57,7 @@ class FlightMapFragment : BaseFragment<FragmentFlightMapBinding>(R.layout.fragme
 
                     is FlightMapUiState.Success -> {
                         binding.countrySpinner.visibility = View.VISIBLE
-
-                        val countryList = listOf("Tümü") + state.countries
-                        val adapter = ArrayAdapter(
-                            requireContext(),
-                            android.R.layout.simple_spinner_item,
-                            countryList
-                        ).apply {
-                            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                        }
-
-                        binding.countrySpinner.adapter = adapter
-                        val selected = state.selectedCountry ?: "Tümü"
-                        val index = countryList.indexOf(selected)
-                        if (index >= 0) binding.countrySpinner.setSelection(index)
-
+                        updateCountrySpinner(state.countries, state.selectedCountry)
                         updateMapMarkers(state.flights)
                     }
 
@@ -78,6 +69,26 @@ class FlightMapFragment : BaseFragment<FragmentFlightMapBinding>(R.layout.fragme
             }
         }
     }
+
+    private fun updateCountrySpinner(countries: List<String>, selected: String?) {
+        val countryList = listOf(ALL_COUNTRIES_OPTION) + countries
+        val adapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_spinner_item,
+            countryList
+        ).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
+
+        binding.countrySpinner.adapter = adapter
+
+        val selection = selected ?: ALL_COUNTRIES_OPTION
+        val index = countryList.indexOf(selection)
+        if (index >= 0) {
+            binding.countrySpinner.setSelection(index)
+        }
+    }
+
 
     private fun initSpinnerListener() {
         binding.countrySpinner.onItemSelectedListener =
@@ -144,6 +155,10 @@ class FlightMapFragment : BaseFragment<FragmentFlightMapBinding>(R.layout.fragme
     override fun onDestroyView() {
         super.onDestroyView()
         mapRefreshHelper.cleanup()
+    }
+
+    companion object {
+        private const val ALL_COUNTRIES_OPTION = "Tümü"
     }
 }
 

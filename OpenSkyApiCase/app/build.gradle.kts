@@ -41,9 +41,7 @@ android {
         jvmTarget = "11"
     }
 
-    kapt {
-        correctErrorTypes = true
-    }
+
 }
 
 dependencies {
@@ -81,7 +79,16 @@ dependencies {
     // Lifecycle ViewModel
     implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.lifecycle.runtime.ktx)
+    //Splash
+    implementation(libs.core.splashscreen)
+    
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+
+}
+
+kapt {
+    correctErrorTypes = true
 }
