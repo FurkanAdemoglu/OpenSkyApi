@@ -19,6 +19,9 @@ fragment = "1.6.2"
 navigation = "2.7.5"
 chucker = "4.0.0"
 core-splashscreen = "1.0.1"
+mockk = "1.13.3"
+turbine = "0.12.1"
+androidx-core-testing = "2.2.0"
 
 
 [libraries]
@@ -52,6 +55,11 @@ navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx", version.
 chucker-debug = { group = "com.github.chuckerteam.chucker", name = "library", version.ref = "chucker" }
 chucker-release = { group = "com.github.chuckerteam.chucker", name = "library-no-op", version.ref = "chucker" }
 core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "core-splashscreen" }
+
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "androidx-core-testing" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

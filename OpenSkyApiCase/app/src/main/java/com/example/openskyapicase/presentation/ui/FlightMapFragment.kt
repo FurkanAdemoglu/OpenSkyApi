@@ -110,6 +110,7 @@ class FlightMapFragment : BaseFragment<FragmentFlightMapBinding>(R.layout.fragme
         googleMap = map
         mapRefreshHelper = MapRefreshHelper(
             googleMap = map,
+            lifecycle = viewLifecycleOwner.lifecycle,
             scope = viewLifecycleOwner.lifecycleScope,
             onRefresh = { viewModel.fetchFlights() }
         )
@@ -150,6 +151,11 @@ class FlightMapFragment : BaseFragment<FragmentFlightMapBinding>(R.layout.fragme
             .setMessage(message)
             .setPositiveButton("Tamam", null)
             .show()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mapRefreshHelper.cleanup()
     }
 
     override fun onDestroyView() {

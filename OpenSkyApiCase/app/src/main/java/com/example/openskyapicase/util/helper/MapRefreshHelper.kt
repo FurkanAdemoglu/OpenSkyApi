@@ -1,5 +1,8 @@
 package com.example.openskyapicase.util.helper
 
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import com.google.android.gms.maps.GoogleMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -10,14 +13,17 @@ import kotlinx.coroutines.launch
 class MapRefreshHelper(
     private val googleMap: GoogleMap,
     private val scope: CoroutineScope,
+    lifecycle: Lifecycle,
     private val refreshDelayMillis: Long = 10_000L,
     private val onRefresh: () -> Unit
-) {
+):DefaultLifecycleObserver {
 
     private var refreshJob: Job? = null
     private var isCameraIdle = false
+    private var isLifecycleResumed = true
 
     init {
+        lifecycle.addObserver(this)
         setupMapListeners()
     }
 
@@ -37,7 +43,7 @@ class MapRefreshHelper(
 
     private fun startRefreshing() {
         refreshJob = scope.launch {
-            while (isActive && isCameraIdle) {
+            while (isActive && isCameraIdle && isLifecycleResumed) {
                 delay(refreshDelayMillis)
                 onRefresh()
             }
@@ -46,5 +52,22 @@ class MapRefreshHelper(
 
     fun cleanup() {
         refreshJob?.cancel()
+    }
+
+    override fun onPause(owner: LifecycleOwner) {
+        isLifecycleResumed = false
+        refreshJob?.cancel()
+    }
+
+    override fun onResume(owner: LifecycleOwner) {
+        isLifecycleResumed = true
+        if (isCameraIdle) {
+            startRefreshing()
+        }
+    }
+
+    override fun onDestroy(owner: LifecycleOwner) {
+        super.onDestroy(owner)
+        cleanup()
     }
 }

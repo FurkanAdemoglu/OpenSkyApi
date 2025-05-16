@@ -81,10 +81,19 @@ dependencies {
     implementation(libs.lifecycle.runtime.ktx)
     //Splash
     implementation(libs.core.splashscreen)
-    
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    testImplementation(libs.mockk)
+    testImplementation(libs.coroutines.test)
+    testImplementation(libs.turbine)
+    testImplementation(libs.androidx.core.testing)
+
+    androidTestImplementation(libs.junit)
+    androidTestImplementation(libs.mockk)
+    androidTestImplementation(libs.androidx.core.testing)
+    androidTestImplementation(libs.coroutines.test)
 
 
 }

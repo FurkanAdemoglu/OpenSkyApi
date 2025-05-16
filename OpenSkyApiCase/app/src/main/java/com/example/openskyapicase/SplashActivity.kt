@@ -3,8 +3,6 @@ package com.example.openskyapicase
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.openskyapicase.util.extension.isInternetAvailable
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -15,9 +13,6 @@ class SplashActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
-
-        super.onCreate(savedInstanceState)
-
         if (this.isInternetAvailable()) {
             startActivity(Intent(this, MainActivity::class.java))
             finish()
@@ -30,5 +25,6 @@ class SplashActivity : ComponentActivity() {
                 .setNegativeButton("Çıkış") { _, _ -> finish() }
                 .show()
         }
+        super.onCreate(savedInstanceState)
     }
 }
