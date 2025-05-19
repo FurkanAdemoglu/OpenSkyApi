@@ -3,6 +3,7 @@ package com.example.openskyapicase.presentation.flightmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.openskyapicase.common.State
+import com.example.openskyapicase.data.remote.requestmodel.CoordinatesRequestModel
 import com.example.openskyapicase.domain.model.Flight
 import com.example.openskyapicase.domain.usecase.GetFlightsUseCase
 import com.example.openskyapicase.util.CityLocation
@@ -37,13 +38,21 @@ class FlightMapViewModel @Inject constructor(
     private var allFlights: List<Flight> = emptyList()
     var isCameraMoved = false
 
-    init {
-        fetchFlights()
-    }
-
-    fun fetchFlights() {
+    fun fetchFlights(
+        lomin: Double,
+        lamin: Double,
+        lomax: Double,
+        lamax: Double
+    ) {
         viewModelScope.launch {
-            getFlightsUseCase(CityLocation.getIstanbulLocation())
+            getFlightsUseCase(
+                CoordinatesRequestModel(
+                    lomin = lomin,
+                    lamin = lamin,
+                    lomax = lomax,
+                    lamax = lamax
+                )
+            )
                 .collect { state ->
                     when (state) {
                         is State.Loading -> {

@@ -31,7 +31,6 @@ class FlightMapFragment : BaseFragment<FragmentFlightMapBinding>(R.layout.fragme
     private var googleMap: GoogleMap? = null
     private lateinit var mapRefreshHelper: MapRefreshHelper
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -113,8 +112,12 @@ class FlightMapFragment : BaseFragment<FragmentFlightMapBinding>(R.layout.fragme
             googleMap = map,
             lifecycle = viewLifecycleOwner.lifecycle,
             scope = viewLifecycleOwner.lifecycleScope,
-            onRefresh = { viewModel.fetchFlights() }
+            onRefresh = { fetchFlightsFromMapBounds()}
         )
+        googleMap?.setOnCameraIdleListener {
+            fetchFlightsFromMapBounds()
+        }
+        fetchFlightsFromMapBounds()
     }
 
     //Markerları ekranda koordinatlarına göre gösteren yapı
@@ -146,6 +149,18 @@ class FlightMapFragment : BaseFragment<FragmentFlightMapBinding>(R.layout.fragme
             viewModel.isCameraMoved = true
         }
     }
+
+    private fun fetchFlightsFromMapBounds() {
+        val bounds = googleMap?.projection?.visibleRegion?.latLngBounds ?: return
+        val lomin = bounds.southwest.longitude
+        val lamin = bounds.southwest.latitude
+        val lomax = bounds.northeast.longitude
+        val lamax = bounds.northeast.latitude
+
+        viewModel.fetchFlights(lomin, lamin, lomax, lamax)
+    }
+
+
 
     //OnPause ve onDestroyda 10 saniyede bir yenileme özelliği kapanıyor uygulama arka plana geçtiği için
     override fun onPause() {
