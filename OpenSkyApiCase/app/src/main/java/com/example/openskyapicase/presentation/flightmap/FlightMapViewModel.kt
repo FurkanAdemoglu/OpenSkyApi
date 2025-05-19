@@ -6,7 +6,6 @@ import com.example.openskyapicase.common.State
 import com.example.openskyapicase.data.remote.requestmodel.CoordinatesRequestModel
 import com.example.openskyapicase.domain.model.Flight
 import com.example.openskyapicase.domain.usecase.GetFlightsUseCase
-import com.example.openskyapicase.util.CityLocation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
