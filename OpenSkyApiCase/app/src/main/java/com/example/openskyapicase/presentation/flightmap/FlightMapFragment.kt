@@ -114,9 +114,6 @@ class FlightMapFragment : BaseFragment<FragmentFlightMapBinding>(R.layout.fragme
             scope = viewLifecycleOwner.lifecycleScope,
             onRefresh = { fetchFlightsFromMapBounds()}
         )
-        googleMap?.setOnCameraIdleListener {
-            fetchFlightsFromMapBounds()
-        }
         fetchFlightsFromMapBounds()
     }
 
